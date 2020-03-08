@@ -1,0 +1,44 @@
+
+logging:
+    level:
+        root: info
+        com.cloud: debug
+    file: logs/${spring.application.name}.log
+spring:
+    application:
+        name: sdc-demo
+    jackson:
+        date-format: yyyy-MM-dd HH:mm:ss
+        time-zone: GMT+8
+#        空值转换
+#        default-property-inclusion: non_default
+    ##============== kafka 生产者 ===================
+    kafka:
+        #bootstrap-servers: 192.168.2.173:9092
+        #bootstrap-servers: 134.160.110.69:9092
+        bootstrap-servers: 172.28.65.26:9092
+
+        producer:
+            #当retris为0时，produce不会重复。retirs重发，此时repli节点完全成为leader节点，不会产生消息丢失
+            retries: 0
+            #每次批量发送消息的数量,produce积累到一定数据，一次发送
+            batch-size: 16384
+            # produce积累数据一次发送，缓存大小达到buffer.memory就发送数据
+            buffer-memory: 33554432
+#            acks: 1
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+        #=============== consumer  =======================
+        consumer:
+            # 指定默认消费者group id --> 由于在kafka中，同一组中的consumer不会读取到同一个消息，依靠groud.id设置组名
+            group-id: test1
+            #smallest和largest才有效，如果smallest重新0开始读取，如果是largest从logfile的offset读取。一般情况下我们都是设置smalles
+            auto-offset-reset: earliest
+            # enable.auto.commit:true --> 设置自动提交offset
+            enable-auto-commit: true
+            auto-commit-interval: 100
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            alue-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+server:
+    port: 8775
